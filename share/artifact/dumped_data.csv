@@ -1,0 +1,7 @@
+bench_name,ncpu,ops,media,fs
+CREATE,1,138381.087955,pmem,p2cache
+MKDIR,1,188408.079843,pmem,p2cache
+UNLINK,1,257848.588730,pmem,p2cache
+RMDIR,1,163084.089745,pmem,p2cache
+LINK,1,194375.322420,pmem,p2cache
+RENAME,1,133960.787802,pmem,p2cache
