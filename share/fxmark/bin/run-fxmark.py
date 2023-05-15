@@ -9,6 +9,7 @@ import pdb
 from os.path import join
 from perfmon import PerfMon
 import subprocess
+import argparse
 
 from inspect import getframeinfo, stack
 
@@ -60,7 +61,8 @@ class Runner(object):
     def __init__(self, \
                  core_grain = CORE_COARSE_GRAIN, \
                  pfm_lvl = PerfMon.LEVEL_LOW, \
-                 run_filter = ("*", "*", "*", "*", "*")):
+                 run_filter = ("*", "*", "*", "*", "*"), \
+                 log_dir = "/tmp", bench_type = None):
         # run config
         self.CORE_GRAIN    = core_grain
         self.PERFMON_LEVEL = pfm_lvl
@@ -159,19 +161,20 @@ class Runner(object):
         self.nova_module_path = os.path.normpath("../nova/nova.ko")
         self.p2cache_module_path = os.path.normpath("../p2cache/p2cache.ko")
         self.perfmon_log = ""
-        self.log_dir     = ""
+        self.log_dir     = log_dir
         self.log_path    = ""
         self.umount_hook = []
         self.active_ncore = -1
+        self.bench_type = bench_type
 
     def log_start(self):
-        self.log_dir = os.path.normpath(
-            os.path.join(CUR_DIR, self.LOGD_NAME,
-                         str(datetime.datetime.now()).replace(' ','-').replace(':','-')))
-        self.log_path = os.path.normpath( os.path.join(self.log_dir, "fxmark.log"))
-        self.exec_cmd("mkdir -p " + self.log_dir, self.dev_null)
+        # self.log_dir = os.path.normpath(
+        #     os.path.join(CUR_DIR, self.LOGD_NAME,
+        #                  str(datetime.datetime.now()).replace(' ','-').replace(':','-')))
+        self.log_path = os.path.normpath( os.path.join(self.log_dir, "%s.log" % self.bench_type))
+        # self.exec_cmd("mkdir -p " + self.log_dir, self.dev_null)
 
-        self.log_fd = open(self.log_path, "bw")
+        self.log_fd = open(self.log_path, "ba", buffering=0)
         p = self.exec_cmd("echo -n \"### SYSTEM         = \"; uname -a", self.redirect)
         if self.redirect:
             for l in p.stdout.readlines():
@@ -397,7 +400,7 @@ class Runner(object):
         if not rc:
             return False
 
-        p = self.exec_cmd(' '.join(["mount -t ovl -o init", #sudo
+        p = self.exec_cmd(' '.join(["mount -t p2cache -o init", #sudo
                                     dev_path, mnt_path]),
                           self.dev_null)
         if p.returncode != 0:
@@ -520,10 +523,18 @@ class Runner(object):
         return (self.fxmark_path, bench)
 
     def fxmark(self, media, fs, bench, ncore, nfg, nbg, dio):
+        (bin, type) = self.get_bin_type(bench)
+        pos = type.find("NAME_")
+        if pos != -1:
+            bench_name = type[pos+5:]
+            type = type[:pos-1]
+
         self.perfmon_log = os.path.normpath(
             os.path.join(self.log_dir,
-                         '.'.join([media, fs, bench, str(nfg), "pm"])))
-        (bin, type) = self.get_bin_type(bench)
+                         '.'.join([media, fs, type, str(nfg), "pm"])))
+
+        print(self.perfmon_log)
+        
         directio = '1' if dio == "directio" else '0'
 
         if directio == '1':
@@ -537,7 +548,7 @@ class Runner(object):
                         bin,
                         "--ncore", str(ncore),
                         "--nbg",  str(nbg),
-                        "--duration", str(self.DURATION),
+                        "--duration", str(self.DURATION) if bench_name != "Fileserver" else "10",
                         # "--directio", directio,
                         "--root", self.test_root,
                         "--profbegin", "\"%s\"" % self.perfmon_start,
@@ -568,8 +579,6 @@ class Runner(object):
                     sync = 1
                 elif arg == 'W':
                     op = 1
-                elif arg.startswith('NAME'):
-                    bench_name = arg[5:]
 
             cmd = ' '.join([cmd,
                             "--type", "DATA",
@@ -604,8 +613,6 @@ class Runner(object):
                     op = 7
                 elif arg.startswith('AM'):
                     m_amount = get_size(arg[3:])
-                elif arg.startswith('NAME'):
-                    bench_name = arg[5:]
 
             cmd = ' '.join([cmd,
                             "--type", "META",
@@ -616,7 +623,7 @@ class Runner(object):
             cmd = ' '.join([cmd, "--type", type])
 
         self.log("[bench_name]:[%s]"%bench_name)
-
+        # print(cmd)
         p = self.exec_cmd(cmd, self.redirect)
         if self.redirect:
             for l in p.stdout.readlines():
@@ -644,7 +651,7 @@ class Runner(object):
             if ("p2cache" in self.FS_TYPES) and module_loaded("p2cache") != True:
                 p = self.exec_cmd("insmod " + self.p2cache_module_path)
                 if p.returncode != 0:
-                    self.log("# Fail to load ovl kernel module")
+                    self.log("# Fail to load p2cache kernel module")
                     return
 
 
@@ -707,105 +714,96 @@ def module_loaded(module_name):
 
 if __name__ == "__main__":
 
-    benchmark = sys.argv[1]
+    parser = argparse.ArgumentParser(description='benchmark')
+    parser.add_argument('-l', '--log_dir', type=str, default= "test.log",
+                        help='path to log')
+    parser.add_argument('-b', '--bench_type', type=str, default= "",
+                        help='bench type, e.g., meta_without_fsync')
+
+    args = parser.parse_args()
 
     base_media_and_fs = [
         # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("mem", "tmpfs", "*", "1", "bufferedio")),
-        # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "ext4", "*", "1", "bufferedio")),
-        # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "ext4_dj", "*", "1", "bufferedio")),
-        # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "xfs", "*", "1", "bufferedio")),
-        # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "ext4_dax", "*", "1", "bufferedio")),
-        # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "xfs_dax", "*", "1", "bufferedio")),
-        # (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "nova", "*", "1", "bufferedio")),
+        (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "ext4", "*", "1", "bufferedio")),
+        (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "ext4_dj", "*", "1", "bufferedio")),
+        (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "xfs", "*", "1", "bufferedio")),
+        (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "ext4_dax", "*", "1", "bufferedio")),
+        (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "xfs_dax", "*", "1", "bufferedio")),
+        (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "nova", "*", "1", "bufferedio")),
         (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "p2cache", "*", "1", "bufferedio")),
     ]
 
-    # bench_names = {
-    #     "meta_without_fsync": [
-    #         "CREATE",
-    #         "MKDIR",
-    #         "UNLINK",
-    #         "RMDIR",
-    #         "LINK",
-    #         "RENAME",
-    #     ],
-    #     "meta_with_fsync": [
-    #         "CREATE",
-    #         "MKDIR",
-    #         "UNLINK",
-    #         "RMDIR",
-    #         "LINK",
-    #         "RENAME",
-    #     ],
-    # }
+
+    amount = 100000
+    ts = '1G'
 
     bench_types = {
         "meta_without_fsync": [
-            "META:CREATE:AM_1000000:NAME_CREATE",
-            "META:MKDIR:AM_1000000:NAME_MKDIR",
-            "META:UNLINK:AM_1000000:NAME_UNLINK",
-            "META:RMDIR:AM_1000000:NAME_RMDIR",
-            "META:LINK:AM_1000000:NAME_LINK",
-            "META:RENAME:AM_1000000::NAME_RENAME",
+            "META:CREATE:AM_%d:NAME_CREATE" % amount,
+            "META:MKDIR:AM_%d:NAME_MKDIR" % amount,
+            "META:UNLINK:AM_%d:NAME_UNLINK" % amount,
+            "META:RMDIR:AM_%d:NAME_RMDIR" % amount,
+            "META:LINK:AM_%d:NAME_LINK" % amount,
+            "META:RENAME:AM_%d::NAME_RENAME" % amount,
         ],
         "meta_with_fsync": [
-            "META:CREATE:SYNC:AM_1000000",
-            "META:MKDIR:SYNC:AM_1000000",
-            "META:UNLINK:SYNC:AM_1000000",
-            "META:RMDIR:SYNC:AM_1000000",
-            "META:LINK:SYNC:AM_1000000",
-            "META:RENAME:SYNC:AM_1000000",
+            "META:CREATE:SYNC:AM_%d:NAME_CREATE" % amount,
+            "META:MKDIR:SYNC:AM_%d:NAME_MKDIR" % amount,
+            "META:UNLINK:SYNC:AM_%d:NAME_UNLINK" % amount,
+            "META:RMDIR:SYNC:AM_%d:NAME_RMDIR" % amount,
+            "META:LINK:SYNC:AM_%d:NAME_LINK" % amount,
+            "META:RENAME:SYNC:AM_%d:NAME_RENAME" % amount,
         ],
         "data_without_fdatasync": [    
             # append
-            "DATA:W:AS_100:SS_100:TS_8G:PTS_0", # append 100B (access_size 100B, step_size 100B, total_size 8G)
-            "DATA:W:AS_1K:SS_1K:TS_8G:PTS_0", # append 1K
-            "DATA:W:AS_2K:SS_2K:TS_8G:PTS_0", # append 2K
-            "DATA:W:AS_4K:SS_4K:TS_8G:PTS_0", # append 4K
-            "DATA:W:AS_16K:SS_16K:TS_8G:PTS_0", # append 16K
-            "DATA:W:AS_64K:SS_64K:TS_8G:PTS_0", # append 64K
-            "DATA:W:AS_1M:SS_1M:TS_8G:PTS_0", # append 1M
+            "DATA:W:AS_100:SS_100:TS_%s:PTS_0:NAME_A_100B" % ts, # append 100B (access_size 100B, step_size 100B, total_size 8G)
+            "DATA:W:AS_1K:SS_1K:TS_%s:PTS_0:NAME_A_1KB" % ts, # append 1K
+            "DATA:W:AS_2K:SS_2K:TS_%s:PTS_0:NAME_A_2KB" % ts, # append 2K
+            "DATA:W:AS_4K:SS_4K:TS_%s:PTS_0:NAME_A_4KB" % ts, # append 4K
+            "DATA:W:AS_16K:SS_16K:TS_%s:PTS_0:NAME_A_16KB" % ts, # append 16K
+            "DATA:W:AS_64K:SS_64K:TS_%s:PTS_0:NAME_A_64KB" % ts, # append 64K
+            "DATA:W:AS_1M:SS_1M:TS_%s:PTS_0:NAME_A_1MB" % ts, # append 1M
             # overwrite
-            "DATA:W:AS_100:SS_100:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:W:AS_1K:SS_1K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:W:AS_2K:SS_2K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
+            "DATA:W:AS_100:SS_100:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_O_100B" % (ts, ts),
+            "DATA:W:AS_1K:SS_1K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_O_1KB" % (ts, ts),
+            "DATA:W:AS_2K:SS_2K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_O_2KB" % (ts, ts),
         ],
         "data_with_fdatasync": [
             # append 
-            "DATA:W:AS_100:SS_100:TS_8G:PTS_0:SYNC",
-            "DATA:W:AS_1K:SS_1K:TS_8G:PTS_0:SYNC",
-            "DATA:W:AS_2K:SS_2K:TS_8G:PTS_0:SYNC",
-            "DATA:W:AS_4K:SS_4K:TS_8G:PTS_0:SYNC",
-            "DATA:W:AS_16K:SS_16K:TS_8G:PTS_0:SYNC",
-            "DATA:W:AS_64K:SS_64K:TS_8G:PTS_0:SYNC",
-            "DATA:W:AS_1M:SS_1M:TS_8G:PTS_0:SYNC",
+            "DATA:W:AS_100:SS_100:TS_%s:PTS_0:SYNC:NAME_A_100B" % ts,
+            "DATA:W:AS_1K:SS_1K:TS_%s:PTS_0:SYNC:NAME_A_1KB" % ts,
+            "DATA:W:AS_2K:SS_2K:TS_%s:PTS_0:SYNC:NAME_A_2KB" % ts,
+            "DATA:W:AS_4K:SS_4K:TS_%s:PTS_0:SYNC:NAME_A_4KB" % ts,
+            "DATA:W:AS_16K:SS_16K:TS_%s:PTS_0:SYNC:NAME_A_16KB" % ts,
+            "DATA:W:AS_64K:SS_64K:TS_%s:PTS_0:SYNC:NAME_A_64KB" % ts,
+            "DATA:W:AS_1M:SS_1M:TS_%s:PTS_0:SYNC:NAME_A_1MB" % ts,
             # overwrite
-            "DATA:W:AS_100:SS_100:TS_8G:PAS_32K:PSS_32K:PTS_8G:SYNC",
-            "DATA:W:AS_1K:SS_1K:TS_8G:PAS_32K:PSS_32K:PTS_8G:SYNC",
-            "DATA:W:AS_2K:SS_2K:TS_8G:PAS_32K:PSS_32K:PTS_8G:SYNC",
+            "DATA:W:AS_100:SS_100:TS_%s:PAS_32K:PSS_32K:PTS_%s:SYNC:NAME_O_100B" % (ts, ts),
+            "DATA:W:AS_1K:SS_1K:TS_%s:PAS_32K:PSS_32K:PTS_%s:SYNC:NAME_O_1KB" % (ts, ts),
+            "DATA:W:AS_2K:SS_2K:TS_%s:PAS_32K:PSS_32K:PTS_%s:SYNC:NAME_O_2KB" % (ts, ts),
         ],
         "read": [
-            "DATA:R:AS_100:SS_100:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:R:AS_1K:SS_1K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:R:AS_2K:SS_2K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:R:AS_4K:SS_4K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:R:AS_16K:SS_16K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:R:AS_64K:SS_64K:TS_8G:PAS_32K:PSS_32K:PTS_8G",
-            "DATA:R:AS_1M:SS_1M:TS_8G:PAS_32K:PSS_32K:PTS_8G",
+            "DATA:R:AS_100:SS_100:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_100B" % (ts, ts),
+            "DATA:R:AS_1K:SS_1K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_1KB" % (ts, ts),
+            "DATA:R:AS_2K:SS_2K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_2KB" % (ts, ts),
+            "DATA:R:AS_4K:SS_4K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_4KB" % (ts, ts),
+            "DATA:R:AS_16K:SS_16K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_16KB" % (ts, ts),
+            "DATA:R:AS_64K:SS_64K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_64KB" % (ts, ts),
+            "DATA:R:AS_1M:SS_1M:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_1MB" % (ts, ts),
         ],
         "scalability": [
-            "DATA:W:AS_4K:SS_4K:TS_8G:PTS_0:SYNC",
+            "DATA:W:AS_4K:SS_4K:TS_%s:PTS_0:SYNC:NAME_4KB" % ts,
         ],
         "filebench": [
-            "filebench_webproxy",
-            "filebench_varmail",
-            "filebench_fileserver",
+            "filebench_webproxy:NAME_Webproxy",
+            "filebench_varmail:NAME_Varmail",
+            "filebench_fileserver:NAME_Fileserver",
         ]
     }
     
     media_and_fs_config = {
-        "meta_without_fsync": base_media_and_fs,
-        "meta_with_fsync": base_media_and_fs,
+        "meta_without_fsync": base_media_and_fs + [(Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("mem", "tmpfs", "*", "1", "bufferedio"))],
+        "meta_with_fsync": base_media_and_fs + [(Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("mem", "tmpfs", "*", "1", "bufferedio"))],
         "data_without_fdatasync": base_media_and_fs,
         "data_with_fdatasync": base_media_and_fs,
         "read": base_media_and_fs,
@@ -817,6 +815,7 @@ if __name__ == "__main__":
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "ext4_dax", "*", "*", "bufferedio")),
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "xfs_dax", "*", "*", "bufferedio")),
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "nova", "*", "*", "bufferedio")),
+            (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "p2cache", "*", "*", "bufferedio"))
         ],
         "filebench": [
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("mem", "tmpfs", "*", "8", "bufferedio")),
@@ -826,12 +825,12 @@ if __name__ == "__main__":
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "ext4_dax", "*", "8", "bufferedio")),
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "xfs_dax", "*", "8", "bufferedio")),
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "nova", "*", "8", "bufferedio")),
+            (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "p2cache", "*", "8", "bufferedio"))
         ]
     }
 
-    Runner.BENCH_TYPES = bench_types[benchmark]
-    print(Runner.BENCH_TYPES)
+    Runner.BENCH_TYPES = bench_types[args.bench_type]
 
-    for c in media_and_fs_config[benchmark]:
-        runner = Runner(c[0], c[1], c[2])
+    for c in media_and_fs_config[args.bench_type]:
+        runner = Runner(c[0], c[1], c[2], log_dir = args.log_dir, bench_type = args.bench_type)
         runner.run()

@@ -125,7 +125,7 @@ static inline void set_default_opts(struct ovl_sb_info *sbi)
 	sbi->cpus = 12;
 	ovl_info("%d cpus online\n", sbi->cpus);
 	sbi->map_id = 0;
-	sbi->enable_dram_page = 0;
+	sbi->enable_dram_page = 1;
 	sbi->enable_dram_log = 0;
 	sbi->write_back_sync = 1;
 	// sbi->snapshot_si = NULL;

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -31,12 +33,10 @@ def calc_pos(total_nr, idx):
     offset = (idx - (total_nr - 1) / 2) * width
     return offset, width
 
-fig, (ax, ax1) = plt.subplots(1, 2, figsize = (16,4), gridspec_kw={'width_ratios': [2, 1]})
+# axis for append and overwrite
+fig, (ax_A, ax_O) = plt.subplots(1, 2, figsize = (16,4), gridspec_kw={'width_ratios': [2, 1]})
 
-df = pd.read_csv("share/output/data_with_fdatasync.csv", delimiter = "\t")
-# df1 = pd.read_csv("data/fig7b2.txt", delimiter = "\t")
-x = np.arange(len(df["bench_name"]))
-
+df = pd.read_csv("share/output/data_with_fdatasync.csv", delimiter = ",", encoding='utf8')
 
 
 data_names = ["ext4_ops", "ext4_dax_ops", "ext4_dj_ops", "nova_ops", 
@@ -44,37 +44,52 @@ data_names = ["ext4_ops", "ext4_dax_ops", "ext4_dj_ops", "nova_ops",
 
 label_names = ["Ext4", "Ext4-DAX", "Ext4-DJ", "NOVA",
         "p2Cache", "XFS", "XFS-DAX"]
-xaxis = ["100B", "1KB", "2KB", "4KB", "16KB", "64KB"]
+
+xaxis_A = ["A_100B", "A_1KB", "A_2KB", "A_4KB", "A_16KB", "A_64KB"]
+xaxis_O = ["O_100B", "O_1KB", "O_2KB"]
+
+x_A = np.arange(len(xaxis_A))
+x_O = np.arange(len(xaxis_O))
+
+
+df_A = df.loc[df['bench_name'].isin(xaxis_A)].copy()
+df_O = df.loc[df['bench_name'].isin(xaxis_O)].copy()
+
+df_A['bench_name'] = df_A['bench_name'].astype("category")
+df_O['bench_name'] = df_O['bench_name'].astype("category")
+df_A['bench_name'] = df_A['bench_name'].cat.set_categories(xaxis_A)
+df_O['bench_name'] = df_O['bench_name'].cat.set_categories(xaxis_O)
+df_A = df_A.sort_values('bench_name')
+df_O = df_O.sort_values('bench_name')
+
 
 bar_num = len(data_names)
 for idx, i in enumerate(data_names):
     offset, wid = calc_pos(bar_num, idx)
-    ax.bar(x + offset, df[i] / 1000000, label = label_names[idx], color = colors[idx], width = wid, edgecolor='black', hatch = patterns[idx])
+    ax_A.bar(x_A + offset, df_A[i] / 1000000, label = label_names[idx], color = colors[idx], width = wid, edgecolor='black', hatch = patterns[idx])
 
-ax.set_xticks(x, xaxis)
-    
-# x = np.arange(len(df1["ext4"]))
+ax_A.set_xticks(x_A, xaxis_A)
 
-# for idx, i in enumerate(data_names):
-#     offset, wid = calc_pos(bar_num, idx)
-#     ax1.bar(x + offset, df1[i] / 1000000, color = colors[idx], width = wid, edgecolor='black', hatch = patterns[idx])
 
-xaxis = ["100B", "1KB", "2KB"]
-# ax1.set_xticks(x, xaxis)
+for idx, i in enumerate(data_names):
+    offset, wid = calc_pos(bar_num, idx)
+    ax_O.bar(x_O + offset, df_O[i] / 1000000, color = colors[idx], width = wid, edgecolor='black', hatch = patterns[idx])
+
+ax_O.set_xticks(x_O, xaxis_O)
     
-# ax1.sharey(ax)
-# ax1.label_outer()
+ax_O.sharey(ax_A)
+ax_O.label_outer()
     
-ax.set_yscale('log')
-ax.grid(axis= 'y',linestyle='--')
-# ax1.grid(axis= 'y',linestyle='--')
-ax.tick_params(axis='both', labelsize=16)
-# ax1.tick_params(axis='both', labelsize=16)
+ax_A.set_yscale('log')
+ax_A.grid(axis= 'y',linestyle='--')
+ax_O.grid(axis= 'y',linestyle='--')
+ax_A.tick_params(axis='both', labelsize=16)
+ax_O.tick_params(axis='both', labelsize=16)
 fig.legend(ncol = 7, fontsize = 16, frameon=False, bbox_to_anchor=(0.95, 1.1))
-ax.set_ylabel("Operations per second\n(Mops/Sec)", fontsize = 16)
-ax.set_title("(1) Append", fontsize = 16, y= -0.2, x = 0.5)
-# ax1.set_title("(2) Overwrite", fontsize = 16, y= -0.2, x = 0.5)
-ax.set_yticks([0.001, 0.005, 0.01, 0.05, 0.1 , 0.2, 0.5, 1, 2, 4], ["0.001", "0.005", "0.01", "0.05", "0.1", "0.2", "0.5", "1", "2", ""])
+ax_A.set_ylabel("Operations per second\n(Mops/Sec)", fontsize = 16)
+ax_A.set_title("(1) Append", fontsize = 16, y= -0.2, x = 0.5)
+ax_O.set_title("(2) Overwrite", fontsize = 16, y= -0.2, x = 0.5)
+ax_A.set_yticks([0.001, 0.005, 0.01, 0.05, 0.1 , 0.2, 0.5, 1, 2, 4], ["0.001", "0.005", "0.01", "0.05", "0.1", "0.2", "0.5", "1", "2", ""])
 fig.tight_layout(pad =0)
 foo_fig = plt.gcf() # 'get current figure'
 foo_fig.savefig('share/output/data_with_fdatasync.png',bbox_inches='tight', format='png', dpi=1000,pad_inches=0.0)

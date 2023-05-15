@@ -1,0 +1,5 @@
+,bench_name,ext4_media,ext4_ops,ext4_dax_media,ext4_dax_ops,ext4_dj_media,ext4_dj_ops,nova_media,nova_ops,p2cache_media,p2cache_ops,tmpfs_media,tmpfs_ops,xfs_media,xfs_ops,xfs_dax_media,xfs_dax_ops
+0,insert_100B,ssd,172,pmem,1526,ssd,204,pmem,96174,pmem,145593,mem,153807,ssd,225,pmem,1556
+1,insert_1KB,ssd,174,pmem,1783,ssd,195,pmem,81325,pmem,123986,mem,160399,ssd,218,pmem,1542
+2,read_100B,ssd,1372476,pmem,1349037,ssd,1340526,pmem,1356601,pmem,1378421,mem,1458633,ssd,1375533,pmem,1420274
+3,read_1KB,ssd,1370724,pmem,1334861,ssd,1339658,pmem,1515067,pmem,1546307,mem,1242178,ssd,1362680,pmem,1420887

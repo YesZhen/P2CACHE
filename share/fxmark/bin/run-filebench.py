@@ -26,16 +26,18 @@ class FileBench(object):
         self.ncore = int(ncore_)
         self.duration = int(duration_)
         self.root = root_
-        self.profbegin = profbegin_
-        self.profend = profend_
-        self.proflog = proflog_
-        self.profenv = ' '.join(["PERFMON_LEVEL=%s" %
-                                 os.environ.get('PERFMON_LEVEL', "x"),
-                                 "PERFMON_LDIR=%s"  %
-                                 os.environ.get('PERFMON_LDIR',  "x"),
-                                 "PERFMON_LFILE=%s" %
-                                 os.environ.get('PERFMON_LFILE', "x")])
+        # self.profbegin = profbegin_
+        # self.profend = profend_
+        # self.proflog = proflog_
+        # self.profenv = ' '.join(["PERFMON_LEVEL=%s" %
+        #                          os.environ.get('PERFMON_LEVEL', "x"),
+        #                          "PERFMON_LDIR=%s"  %
+        #                          os.environ.get('PERFMON_LDIR',  "x"),
+        #                          "PERFMON_LFILE=%s" %
+        #                          os.environ.get('PERFMON_LFILE', "x")])
         self.perf_msg = None
+
+        print("filebench")
 
     def __del__(self):
         # clean up
@@ -55,11 +57,11 @@ class FileBench(object):
         # self._exec_cmd("sudo %s; sync" % FileBench.PRE_SCRIPT).wait()
         self._exec_cmd("%s; sync" % FileBench.PRE_SCRIPT).wait()
         # start performance profiling
-        self._exec_cmd("%s %s" % (self.profenv, self.profbegin)).wait()
+        # self._exec_cmd("%s %s" % (self.profenv, self.profbegin)).wait()
         # run filebench
         self._run_filebench()
         # stop performance profiling
-        self._exec_cmd("%s %s" % (self.profenv, self.profend)).wait()
+        # self._exec_cmd("%s %s" % (self.profenv, self.profend)).wait()
         return 0
 
     def _run_filebench(self):
@@ -84,28 +86,31 @@ class FileBench(object):
 
     def report(self):
         # 65231: 31.114: IO Summary: 34453 ops, 1148.248 ops/s, (177/177 r/w),   4.0mb/s, 420us cpu/op,   5.4ms latency
-        work = 0
-        work_sec = 0
-        for item in self.perf_msg.split(','):
-            vk = item.strip().split()
-            if len(vk) == 2:
-                if vk[1] == "ops":
-                    work = vk[0]
-                elif vk[1] == "ops/s":
-                    work_sec = vk[0]
-        profile_name = ""
-        profile_data = ""
-        try:
-            with open(self.proflog, "r") as fpl:
-                l = fpl.readlines()
-                if len(l) >= 2:
-                    profile_name = l[0]
-                    profile_data = l[1]
-        except:
-            pass
-        print("# ncpu secs works works/sec %s" % profile_name)
-        print("%s %s %s %s %s" %
-              (self.ncore, self.duration, work, work_sec, profile_data))
+        # work = 0
+        # work_sec = 0
+        # for item in self.perf_msg.split(','):
+        #     vk = item.strip().split()
+        #     if len(vk) == 2:
+        #         if vk[1] == "ops":
+        #             work = vk[0]
+        #         elif vk[1] == "ops/s":
+        #             work_sec = vk[0]
+        start_idx = self.perf_msg.find("ops") + len("ops")
+        end_idx = self.perf_msg.find("ops/s")
+        print("[ops]:[%s]" % self.perf_msg[start_idx:end_idx].strip())
+        # profile_name = ""
+        # profile_data = ""
+        # try:
+        #     with open(self.proflog, "r") as fpl:
+        #         l = fpl.readlines()
+        #         if len(l) >= 2:
+        #             profile_name = l[0]
+        #             profile_data = l[1]
+        # except:
+        #     pass
+        # print("# ncpu secs works works/sec %s" % profile_name)
+        # print("%s %s %s %s %s" %
+        #       (self.ncore, self.duration, work, work_sec, profile_data))
 
     def generate_config(self):
         # check config template
@@ -171,8 +176,10 @@ if __name__ == "__main__":
             exit(1)
 
     # run benchmark
+    # filebench = FileBench(opts.type, opts.ncore, opts.duration, opts.root,
+    #                       opts.profbegin, opts.profend, opts.proflog)
     filebench = FileBench(opts.type, opts.ncore, opts.duration, opts.root,
-                          opts.profbegin, opts.profend, opts.proflog)
+                          None, None, None)
     rc = filebench.run()
     filebench.report()
     exit(rc)

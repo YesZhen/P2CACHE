@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -28,12 +30,12 @@ colors = [
 
 mks= ["o", "v", "^", "<", "*", "x", "p", "s", "D", "P"]
 
-df = pd.read_csv("share/output/scalability.csv", delimiter = "\t")
+df = pd.read_csv("share/output/scalability.csv", delimiter = ",", encoding='utf8')
 fig, ax = plt.subplots(figsize = (9, 4))
 names = ["ext4_ops", "ext4_dax_ops", "ext4_dj_ops", "nova_ops", 
          "p2cache_ops", "xfs_ops", "xfs_dax_ops"]
 
-x = np.arange(len(df["Ext4"]))
+x = np.arange(len(df["ext4_ops"]))
 for idx, i in enumerate(names):
     ax.plot(x , df[i] / 1000, label = names[idx], color = colors[idx], marker=mks[idx], markeredgecolor = '#1C1C1C', markersize = 10)
 ax.set_yscale('log')

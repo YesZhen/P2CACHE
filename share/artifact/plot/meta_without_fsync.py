@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -34,7 +36,7 @@ def calc_pos(total_nr, idx):
 
 fig, ax = plt.subplots(figsize = (12,4))
 
-df = pd.read_csv("share/output/meta_without_fsync.csv", delimiter = "\t")
+df = pd.read_csv("share/output/meta_without_fsync.csv", delimiter = ",", encoding='utf8')
 
 x = np.arange(len(df["bench_name"]))
 

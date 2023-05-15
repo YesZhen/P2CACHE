@@ -600,7 +600,7 @@ static ssize_t do_ovl_cow_file_write0(struct file *filp,
 			// ret = __cp(kmem_dram, curr_buf, l, 0);
 			// ret = __cp(kmem, curr_buf, l, 0);
 			BUG_ON(sbi->dram_alloc[cpuid] >= (128849018880UL / PAGE_SIZE / sbi->cpus) * (cpuid+1));
-			if(l >= 16384) {
+			if(l >= 16384 && !((unsigned long)curr_buf & 0x3F) ) { // length greater than 16K and curr_buff is 64-byte align
 				stac();
 				avx_copy(kmem, kmem_dram, curr_buf, l);
 				clac();

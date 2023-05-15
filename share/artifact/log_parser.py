@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import re
 import copy
 import csv
@@ -137,7 +139,7 @@ class dataFrameMerger:
         final_df = final_df.reset_index(drop = True)
         # c = pd.concat(tmplist, axis=1)
         # c.insert(0, col_name, first_col.reset_index(drop=True))
-        final_df.to_csv(output_file_name)
+        final_df.to_csv(output_file_name, encoding='utf-8')
 
 class tabGenerator:
     def __init__(self, config: LogParseConfig, output_name: str):
