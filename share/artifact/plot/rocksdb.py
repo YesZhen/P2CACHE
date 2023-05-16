@@ -58,7 +58,7 @@ bar_num = len(data_names)
 x = np.arange(len(df["bench_name"]), dtype = float)
 for idx, i in enumerate(data_names):
     offset, wid = calc_pos(bar_num, idx)
-    ax.bar(x + offset, df[i] / 1000000, color = colors[idx], width = wid, edgecolor='black', hatch = patterns[idx])
+    ax.bar(x + offset, df[i] / 1000000, label = label_names[idx], color = colors[idx], width = wid, edgecolor='black', hatch = patterns[idx])
 ax.set_yscale('log')
 ax.grid(axis= 'y',linestyle='--')
 ax.tick_params(axis='both', labelsize=16)
@@ -67,7 +67,7 @@ ax.set_yticks([0.001, 0.01, 0.1, 0.2, 0.4, 1, 2], ["0.001", "0.01", "0.1", "0.2"
 ax.set_title("(b) RocksDB", fontsize = 16, y= -0.2, x = 0.5)
 
 
-fig.legend(ncol = 2, fontsize = 16, frameon=False, bbox_to_anchor=(0.85, 1.1))
+fig.legend(ncol = 3, fontsize = 16, frameon=False, bbox_to_anchor=(0.85, 1.3))
 
 fig.tight_layout(pad =0)
 foo_fig = plt.gcf() # 'get current figure'
