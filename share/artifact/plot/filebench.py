@@ -66,7 +66,7 @@ ax.set_yticks([0.03, 0.05, 0.1, 0.2, 0.4, 1], ["0.03", "0.05", "0.1", "0.2", "0.
 ax.set_title("(a) Filebench", fontsize = 16, y= -0.2, x = 0.5)
 
 
-fig.legend(ncol = 2, fontsize = 16, frameon=False, bbox_to_anchor=(0.85, 1.1))
+fig.legend(ncol = 3, fontsize = 16, frameon=False, bbox_to_anchor=(0.85, 1.3))
 
 fig.tight_layout(pad =0)
 foo_fig = plt.gcf() # 'get current figure'
