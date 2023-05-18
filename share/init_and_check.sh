@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+mkdir -p share/tmp share/output
 
 lsmod | grep nova > /dev/null
 if [ $? -ne 0 ]; then
