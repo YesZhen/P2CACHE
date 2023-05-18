@@ -1,7 +1,0 @@
-,bench_name,ext4_ncpu,ext4_ops,ext4_media,ext4_dax_ncpu,ext4_dax_ops,ext4_dax_media,ext4_dj_ncpu,ext4_dj_ops,ext4_dj_media,nova_ncpu,nova_ops,nova_media,p2cache_ncpu,p2cache_ops,p2cache_media,tmpfs_ncpu,tmpfs_ops,tmpfs_media,xfs_ncpu,xfs_ops,xfs_media,xfs_dax_ncpu,xfs_dax_ops,xfs_dax_media
-0,CREATE,1,204.299258,ssd,1,1238.542639,pmem,1,209.078521,ssd,1,69070.838361,pmem,1,85319.427404,pmem,1,92961.25282,mem,1,337.362809,ssd,1,11373.980223,pmem
-1,LINK,1,210.081149,ssd,1,11131.790267,pmem,1,207.440771,ssd,1,68137.575215,pmem,1,95217.328792,pmem,1,102567.25848,mem,1,330.649275,ssd,1,15073.189378,pmem
-2,MKDIR,1,196.647408,ssd,1,1266.893412,pmem,1,202.830528,ssd,1,63366.256328,pmem,1,84864.789175,pmem,1,92328.345448,mem,1,340.522073,ssd,1,10749.41018,pmem
-3,RENAME,1,209.756976,ssd,1,2892.087853,pmem,1,202.712494,ssd,1,49798.911993,pmem,1,76640.685474,pmem,1,80397.485167,mem,1,324.248844,ssd,1,12159.609959,pmem
-4,RMDIR,1,37259.101281,ssd,1,37442.918271,pmem,1,37396.96202,ssd,1,79142.851264,pmem,1,119286.476015,pmem,1,133243.971043,mem,1,47005.425366,ssd,1,46545.833682,pmem
-5,UNLINK,1,95601.380484,ssd,1,84906.8699,pmem,1,94885.842842,ssd,1,106918.023813,pmem,1,189727.399672,pmem,1,226638.140479,mem,1,68428.237597,ssd,1,68899.2789,pmem

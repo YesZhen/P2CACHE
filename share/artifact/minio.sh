@@ -37,63 +37,55 @@ function prepare_storage() {
 
 rm -f share/tmp/minio.log
 
-# the amount in paper
-# insert_num=1000000
-# read_num=10000000
-
-# to save time, we can reduce amount
-insert_num=100000
-read_num=1000000
 
 for((storage_mode=0;storage_mode<=7;storage_mode++));
 do
     echo "-----------start-----------" | tee -a share/tmp/minio.log
     echo "[bench_name]:[put]" | tee -a share/tmp/minio.log
     prepare_storage $storage_mode
-    result=$(./share/rocksdb/db_bench --benchmarks="fillrandom" --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --sync --key_size=20 --value_size=100 --memtablerep=skip_list --num=$insert_num --threads=1)
-    ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
+    ./share/start_minio.sh
+    ./share/minio/warp put --host=127.0.0.1:9000 --access-key=minioadmin --secret-key=minioadmin --duration=30s --obj.size=128k,1m --concurrent=4 --noclear --quiet --no-color --benchdata=share/tmp/warp
+    printf "\n"
+    result=$(./share/minio/warp analyze --analyze.op=PUT --analyze.v share/tmp/warp.csv.zst --quiet --no-color)
+    ops=$(echo $result | grep -o "Average: .*B/s, .* obj/s Throughput," | grep -o ", .* obj/s Throughput" | tr -dc '[. [:digit:]]' | xargs)
     echo "[ops]:[$ops]" | tee -a share/tmp/minio.log
+    ./share/minio/mc admin service stop myminio
     umount /mnt/data || /bin/true
     echo "---------------------------" | tee -a share/tmp/minio.log
 done
 
-# for((storage_mode=0;storage_mode<=7;storage_mode++));
-# do
-#     echo "-----------start-----------" | tee -a share/tmp/minio.log
-#     echo "[bench_name]:[read_100B]" | tee -a share/tmp/minio.log
-#     prepare_storage $storage_mode
-#     ./share/rocksdb/db_bench --benchmarks="fillrandom,compact" --wal_dir=/mnt/data --db=/mnt/data --disable_wal=false --key_size=20 --value_size=100 --memtablerep=skip_list --num=$read_num --threads=1
-#     result=$(./share/rocksdb/db_bench --benchmarks="readrandom" --threads=8 --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --key_size=20 --value_size=100 --use_existing_db --num=$read_num --memtablerep=skip_list --verify_checksum)
-#     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
-#     echo "[ops]:[$ops]" | tee -a share/tmp/minio.log
-#     umount /mnt/data || /bin/true
-#     echo "---------------------------" | tee -a share/tmp/minio.log
-# done
+for((storage_mode=0;storage_mode<=7;storage_mode++));
+do
+    echo "-----------start-----------" | tee -a share/tmp/minio.log
+    echo "[bench_name]:[get]" | tee -a share/tmp/minio.log
+    prepare_storage $storage_mode
+    ./share/start_minio.sh
+    ./share/minio/warp get --host=127.0.0.1:9000 --access-key=minioadmin --secret-key=minioadmin --duration=30s --obj.size=1m --concurrent=4 --noclear --quiet --no-color --benchdata=share/tmp/warp
+    printf "\n"
+    result=$(./share/minio/warp analyze --analyze.op=GET --analyze.v share/tmp/warp.csv.zst --quiet --no-color)
+    ops=$(echo $result | grep -o "Average: .*B/s, .* obj/s Throughput," | grep -o ", .* obj/s Throughput" | tr -dc '[. [:digit:]]' | xargs)
+    echo "[ops]:[$ops]" | tee -a share/tmp/minio.log
+    ./share/minio/mc admin service stop myminio
+    umount /mnt/data || /bin/true
+    echo "---------------------------" | tee -a share/tmp/minio.log
+done
 
-# for((storage_mode=0;storage_mode<=7;storage_mode++));
-# do
-#     echo "-----------start-----------" | tee -a share/tmp/minio.log
-#     echo "[bench_name]:[insert_1KB]" | tee -a share/tmp/minio.log
-#     prepare_storage $storage_mode
-#     result=$(./share/rocksdb/db_bench --benchmarks="fillrandom" --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --sync --key_size=20 --value_size=1024 --memtablerep=skip_list --num=$insert_num --threads=1)
-#     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
-#     echo "[ops]:[$ops]" | tee -a share/tmp/minio.log
-#     umount /mnt/data || /bin/true
-#     echo "---------------------------" | tee -a share/tmp/minio.log
-# done
+for((storage_mode=0;storage_mode<=7;storage_mode++));
+do
+    echo "-----------start-----------" | tee -a share/tmp/minio.log
+    echo "[bench_name]:[mixed]" | tee -a share/tmp/minio.log
+    prepare_storage $storage_mode
+    ./share/start_minio.sh
+    ./share/minio/warp mixed --host=127.0.0.1:9000 --access-key=minioadmin --secret-key=minioadmin --duration=30s --obj.size=128k,1m --concurrent=4 --noclear --quiet --no-color --benchdata=share/tmp/warp
+    printf "\n"
+    result=$(./share/minio/warp analyze --analyze.v share/tmp/warp.csv.zst --quiet --no-color)
+    ops=$(echo $result | grep -o "Cluster Total: .*B/s, .* obj/s" | grep -o ", .* obj/s" | tr -dc '[. [:digit:]]' | xargs)
+    echo "[ops]:[$ops]" | tee -a share/tmp/minio.log
+    ./share/minio/mc admin service stop myminio
+    umount /mnt/data || /bin/true
+    echo "---------------------------" | tee -a share/tmp/minio.log
+done
 
-# for((storage_mode=0;storage_mode<=7;storage_mode++));
-# do
-#     echo "-----------start-----------" | tee -a share/tmp/minio.log
-#     echo "[bench_name]:[read_1KB]" | tee -a share/tmp/minio.log
-#     prepare_storage $storage_mode
-#     ./share/rocksdb/db_bench --benchmarks="fillrandom,compact" --wal_dir=/mnt/data --db=/mnt/data --disable_wal=false --key_size=20 --value_size=100 --memtablerep=skip_list --num=$read_num --threads=1
-#     result=$(./share/rocksdb/db_bench --benchmarks="readrandom" --threads=8 --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --key_size=20 --value_size=1024 --use_existing_db --num=$read_num --memtablerep=skip_list --verify_checksum)
-#     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
-#     echo "[ops]:[$ops]" | tee -a share/tmp/minio.log
-#     umount /mnt/data || /bin/true
-#     echo "---------------------------" | tee -a share/tmp/minio.log
-# done
 
 ./share/artifact/log_parser.py --log_path share/tmp/minio.log --config_path share/artifact/log_parser.config --output_path share/output/minio.csv
 

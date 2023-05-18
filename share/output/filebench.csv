@@ -1,4 +1,0 @@
-,bench_name,ext4_ops,ext4_media,ext4_dax_ops,ext4_dax_media,ext4_dj_ops,ext4_dj_media,nova_ops,nova_media,p2cache_ops,p2cache_media,tmpfs_ops,tmpfs_media,xfs_ops,xfs_media,xfs_dax_ops,xfs_dax_media
-0,Fileserver,277298.671,ssd,277106.842,pmem,6317.146,ssd,520325.273,pmem,408433.022,pmem,445045.516,mem,55455.796,ssd,246078.938,pmem
-1,Varmail,2872.021,ssd,30011.417,pmem,3529.727,ssd,968262.852,pmem,980326.614,pmem,998327.575,mem,2149.277,ssd,235230.555,pmem
-2,Webproxy,673684.313,ssd,663308.812,pmem,604589.314,ssd,902045.327,pmem,910288.291,pmem,919970.471,mem,75414.665,ssd,73188.157,pmem

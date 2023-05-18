@@ -294,8 +294,8 @@ int main(int argc, char *argv[])
 
 	/* parse command line options */
 	if (parse_option(argc, argv, &opt) < 4) {
-		usage(stderr);
-		exit(1);
+		usage(stdout);
+		exit(99);
 	}
 
 	/* create, initialize, and run a bench */ 

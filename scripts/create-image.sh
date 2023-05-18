@@ -180,7 +180,7 @@ sudo mkdir -p $DIR/root/share
 # set up directory sharing
 echo 'mount -t 9p -o trans=virtio,version=9p2000.L hostshare /root/share' | sudo tee -a $DIR/root/.profile
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/share/lib' | sudo tee -a $DIR/root/.profile
-echo 'export PATH=$PATH:/root/share:/root/share' | sudo tee -a $DIR/root/.profile
+echo 'export PATH=$PATH:/root/share' | sudo tee -a $DIR/root/.profile
 # disable aslr
 echo 'kernel.randomize_va_space = 0' | sudo tee -a $DIR/etc/sysctl.conf
 echo 'fs.file-max=1000000000' | sudo tee -a $DIR/etc/sysctl.conf
@@ -201,7 +201,7 @@ sudo mount -o bind /dev $DIR/dev
 sudo cp /etc/apt/sources.list $DIR/etc/apt/
 # sudo cp ../share/minio_20220107015323.0.0_amd64.deb $DIR/minio.deb
 # sudo cp ../share/mcli_20220105235251.0.0_amd64.deb $DIR/mc.deb
-sudo chroot $DIR /bin/bash -c "apt-get update -y --allow-unauthenticated; apt-get install -y --allow-unauthenticated ipmctl ndctl libtool m4 automake bison byacc flex tree python2 python3 python3-pip xfsprogs fio jq libsnappy-dev libgflags-dev net-tools"
+sudo chroot $DIR /bin/bash -c "apt-get update -y --allow-unauthenticated; apt-get install -y --allow-unauthenticated ipmctl ndctl libtool m4 automake bison byacc flex tree python2 python3 python3-pip xfsprogs fio jq libsnappy-dev libgflags-dev net-tools zstd"
 sudo chroot $DIR /bin/bash -c "pip3 install json5 pandas matplotlib numpy"
 # sudo chroot $DIR /bin/bash -c "dpkg --purge --force-depends ca-certificates-java"
 # sudo chroot $DIR /bin/bash -c "apt-get update -y --allow-unauthenticated; apt-get install -y --allow-unauthenticated ca-certificates-java"

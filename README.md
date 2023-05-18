@@ -15,6 +15,9 @@ For artifact evaluation, we provide the following two options.
 > **Warning!**
 > Please run all the scripts we provid only under the top-level directory of this repo.
 
+> **Warning!**
+> Some figures may be different from the figures in our paper. In this repo, we change the Y-AXIS from regular-scale to log-scale for better reading in some figures.
+
 ## Table of Contents
 
 <!-- - [Background](#background) -->
@@ -60,20 +63,8 @@ We run the code on Ubuntu 20.04 LTS (https://releases.ubuntu.com/focal/ubuntu-20
 To run the code you need to install these packages:
 
 ```
-sudo apt install build-essentials libgflags-dev libssl-dev numactl cmake
+./scripts/dependencies.sh
 ```
-
-#### Set PM in interleaved mode
-All the Intel Optane DC PMM devices must be unmounted before namespaces are destroyed.
-```
-# destroy current namespaces on Intel Optane DC PMM
-ndctl destroy-namespace -f all
-# reboot is required after this
-ipmctl create -goal
-# execute this after reboot
-ndctl create-namespace
-```
-For more details, please refer https://docs.pmem.io/persistent-memory/getting-started-guide.
 
 ## Usage
 ### Before run
@@ -93,6 +84,15 @@ git submodule update --init --recursive
 
 ```
 
+#### Build Nova
+```
+# Use our script to build Nova for host
+./scripts/build-nova-host.sh
+
+# Different kernel version may cause failure of compilation and installation
+
+```
+
 #### Build FxMark
 ```
 # We use fxmark for microbenchmark and filebench
@@ -101,10 +101,17 @@ git submodule update --init --recursive
 
 ```
 
+#### Build Filebench
+```
+
+./scripts/build-filebench.sh
+
+```
+
 #### Build db_bench (official bench tool from RocksDB)
 
 ```
-./scripts/build-db_bench-host.sh
+./scripts/build-rocksdb.sh
 ```
 
 #### Build MinIO
@@ -128,6 +135,21 @@ Before reproducing results, please run the following command to make sure that t
 ```
 ./share/init_and_check.sh
 ```
+If everything is good, you should be able to see the following output or similar output with all green-check marks. Then, you can start to reproduce results.
+
+![image](https://drive.google.com/uc?export=view&id=1-RPvReFxN2JyA079NiVazPV9cFHroEAF)
+
+If something is wrong, the script will tell you which component is not good. You can try to follow the instruction to fix it or feel free to contact us for help!
+
+![image](https://drive.google.com/uc?export=view&id=1-Racp7G4r1p9pBJ_zYe2nuT9qhm0Y1Y_)
+
+
+### Run experiments
+
+- Run experiment with script, e.g., `.share/artifact/meta_without_fsync.sh`. The experiment scripts wil run experiment, parse log to formatted csv, and plot figure.
+- You can see the log from raw log path, e.g., `tmp/meta_without_fsync.log`.
+- When the experiment is done, you can see the formatted csv from the formatted data path, e.g., `output/meta_without_fsync.csv`.
+- When the experiment is done, you can see the figure from the graph path, e.g., `output/meta_without_fsync.png`.
 
 ### (E1) Figure 6a. P²CACHE significantly accelerates metadata operations as against other cases except for TMPFS (Without fsync).
 
@@ -136,7 +158,7 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/meta_without_fsync.sh`  |
 | Raw log path  | `tmp/meta_without_fsync.log`  |
 | Formatted data path  | `output/meta_without_fsync.csv`  |
-| Graph path  | `output/meta_without_fsync.png`  |
+| Figure path  | `output/meta_without_fsync.png`  |
 | Plot script path  | `share/artifact/plot/meta_without_fsync.py`  |
 
 
@@ -147,7 +169,7 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/meta_with_fsync.sh`  |
 | Raw log path  | `tmp/meta_with_fsync.log`  |
 | Formatted data path  | `output/meta_with_fsync.csv`  |
-| Graph path  | `output/meta_with_fsync.png`  |
+| Figure path  | `output/meta_with_fsync.png`  |
 | Plot script path  | `share/artifact/plot/meta_with_fsync.py`  |
 
 
@@ -158,7 +180,7 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/data_without_fdatasync.sh`  |
 | Raw log path  | `tmp/data_without_fdatasync.log`  |
 | Formatted data path  | `output/data_without_fdatasync.csv`  |
-| Graph path  | `output/data_without_fdatasync.png`  |
+| Figure path  | `output/data_without_fdatasync.png`  |
 | Plot script path  | `share/artifact/plot/data_without_fdatasync.py`  |
 
 
@@ -169,7 +191,7 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/data_with_fdatasync.sh`  |
 | Raw log path  | `tmp/data_with_fdatasync.log`  |
 | Formatted data path  | `output/data_with_fdatasync.csv`  |
-| Graph path  | `output/data_with_fdatasync.png`  |
+| Figure path  | `output/data_with_fdatasync.png`  |
 | Plot script path  | `share/artifact/plot/data_with_fdatasync.py`  |
 
 ### (E5) Figure 8.  Comparisons of performance for reads.
@@ -179,7 +201,7 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/read.sh`  |
 | Raw log path  | `tmp/read.log`  |
 | Formatted data path  | `output/read.csv`  |
-| Graph path  | `output/read.png`  |
+| Figure path  | `output/read.png`  |
 | Plot script path  | `share/artifact/plot/read.py`  |
 
 ### (E6) Figure 9.  Scalability test with 4 KB append operations.
@@ -189,7 +211,7 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/scalability.sh`  |
 | Raw log path  | `tmp/scalability.log`  |
 | Formatted data path  | `output/scalability.csv`  |
-| Graph path  | `output/scalability.png`  |
+| Figure path  | `output/scalability.png`  |
 | Plot script path  | `share/artifact/plot/scalability.py`  |
 
 ### (E7) Figure 10a. Performance comparisons of using real-world applications - Filebench
@@ -199,8 +221,8 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/filebench.sh`  |
 | Raw log path  | `tmp/filebench.log`  |
 | Formatted data path  | `output/filebench.csv`  |
-| Graph path  | `output/application.png`  |
-| Plot script path  | `share/artifact/plot/application.py`  |
+| Figure path  | `output/filebench.png`  |
+| Plot script path  | `share/artifact/plot/filebench.py`  |
 
 ### (E8) Figure 10b. Performance comparisons of using real-world applications - RocksDB
 
@@ -209,8 +231,8 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/rocksdb.sh`  |
 | Raw log path  | `tmp/rocksdb.log`  |
 | Formatted data path  | `output/rocksdb.csv`  |
-| Graph path  | `output/application.png`  |
-| Plot script path  | `share/artifact/plot/application.py`  |
+| Figure path  | `output/rocksdb.png`  |
+| Plot script path  | `share/artifact/plot/rocksdb.py`  |
 
 ### (E9) Figure 10c. Performance comparisons of using real-world applications - MinIO
 
@@ -219,5 +241,5 @@ Before reproducing results, please run the following command to make sure that t
 | Experiments script path  | `share/artifact/minio.sh`  |
 | Raw log path  | `tmp/minio.log`  |
 | Formatted data path  | `output/minio.csv`  |
-| Graph path  | `output/application.png`  |
-| Plot script path  | `share/artifact/plot/application.py`  |
+| Figure path  | `output/minio.png`  |
+| Plot script path  | `share/artifact/plot/minio.py`  |
