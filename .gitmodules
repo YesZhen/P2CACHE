@@ -1,3 +1,6 @@
 [submodule "share/rocksdb"]
 	path = share/rocksdb
 	url = https://github.com/facebook/rocksdb.git
+[submodule "share/filebench"]
+	path = share/filebench
+	url = https://github.com/filebench/filebench.git
