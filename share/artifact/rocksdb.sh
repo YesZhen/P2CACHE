@@ -50,7 +50,7 @@ do
     echo "-----------start-----------" | tee -a share/tmp/rocksdb.log
     echo "[bench_name]:[insert_100B]" | tee -a share/tmp/rocksdb.log
     prepare_storage $storage_mode
-    result=$(./share/rocksdb/db_bench --benchmarks="fillrandom" --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --sync --key_size=20 --value_size=100 --memtablerep=skip_list --num=$insert_num --threads=1)
+    result=$(numactl -C 0-7 ./share/rocksdb/db_bench --benchmarks="fillrandom" --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --sync --key_size=20 --value_size=100 --memtablerep=skip_list --num=$insert_num --threads=1)
     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
     echo "[ops]:[$ops]" | tee -a share/tmp/rocksdb.log
     umount /mnt/data || /bin/true
@@ -62,8 +62,8 @@ do
     echo "-----------start-----------" | tee -a share/tmp/rocksdb.log
     echo "[bench_name]:[read_100B]" | tee -a share/tmp/rocksdb.log
     prepare_storage $storage_mode
-    ./share/rocksdb/db_bench --benchmarks="fillrandom,compact" --wal_dir=/mnt/data --db=/mnt/data --disable_wal=false --key_size=20 --value_size=100 --memtablerep=skip_list --num=$read_num --threads=1
-    result=$(./share/rocksdb/db_bench --benchmarks="readrandom" --threads=8 --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --key_size=20 --value_size=100 --use_existing_db --num=$read_num --memtablerep=skip_list --verify_checksum)
+    numactl -C 0-7 ./share/rocksdb/db_bench --benchmarks="fillrandom,compact" --wal_dir=/mnt/data --db=/mnt/data --disable_wal=false --key_size=20 --value_size=100 --memtablerep=skip_list --num=$read_num --threads=1
+    result=$(numactl -C 0-7 ./share/rocksdb/db_bench --benchmarks="readrandom" --threads=8 --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --key_size=20 --value_size=100 --use_existing_db --num=$read_num --memtablerep=skip_list --verify_checksum)
     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
     echo "[ops]:[$ops]" | tee -a share/tmp/rocksdb.log
     umount /mnt/data || /bin/true
@@ -75,7 +75,7 @@ do
     echo "-----------start-----------" | tee -a share/tmp/rocksdb.log
     echo "[bench_name]:[insert_1KB]" | tee -a share/tmp/rocksdb.log
     prepare_storage $storage_mode
-    result=$(./share/rocksdb/db_bench --benchmarks="fillrandom" --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --sync --key_size=20 --value_size=1024 --memtablerep=skip_list --num=$insert_num --threads=1)
+    result=$(numactl -C 0-7 ./share/rocksdb/db_bench --benchmarks="fillrandom" --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --sync --key_size=20 --value_size=1024 --memtablerep=skip_list --num=$insert_num --threads=1)
     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
     echo "[ops]:[$ops]" | tee -a share/tmp/rocksdb.log
     umount /mnt/data || /bin/true
@@ -87,8 +87,8 @@ do
     echo "-----------start-----------" | tee -a share/tmp/rocksdb.log
     echo "[bench_name]:[read_1KB]" | tee -a share/tmp/rocksdb.log
     prepare_storage $storage_mode
-    ./share/rocksdb/db_bench --benchmarks="fillrandom,compact" --wal_dir=/mnt/data --db=/mnt/data --disable_wal=false --key_size=20 --value_size=100 --memtablerep=skip_list --num=$read_num --threads=1
-    result=$(./share/rocksdb/db_bench --benchmarks="readrandom" --threads=8 --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --key_size=20 --value_size=1024 --use_existing_db --num=$read_num --memtablerep=skip_list --verify_checksum)
+    numactl -C 0-7 ./share/rocksdb/db_bench --benchmarks="fillrandom,compact" --wal_dir=/mnt/data --db=/mnt/data --disable_wal=false --key_size=20 --value_size=100 --memtablerep=skip_list --num=$read_num --threads=1
+    result=$(numactl -C 0-7 ./share/rocksdb/db_bench --benchmarks="readrandom" --threads=8 --wal_dir=/mnt/data --db=/mnt/data --disable_auto_compactions --disable_wal=false --key_size=20 --value_size=1024 --use_existing_db --num=$read_num --memtablerep=skip_list --verify_checksum)
     ops=$(echo $result | grep -o "micros/op .* ops/sec" | tr -dc '[. [:digit:]]' | xargs)
     echo "[ops]:[$ops]" | tee -a share/tmp/rocksdb.log
     umount /mnt/data || /bin/true

@@ -9,7 +9,7 @@ fi
 
 rm -rf /root/.mc /root/.minio
 
-./share/minio/minio server /mnt/data > share/tmp/minio_out.log 2>&1 &
+numactl -C 0-7 ./share/minio/minio server /mnt/data > share/tmp/minio_out.log 2>&1 &
 
 sleep 5s
 
