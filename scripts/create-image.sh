@@ -201,7 +201,7 @@ sudo mount -o bind /dev $DIR/dev
 sudo cp /etc/apt/sources.list $DIR/etc/apt/
 # sudo cp ../share/minio_20220107015323.0.0_amd64.deb $DIR/minio.deb
 # sudo cp ../share/mcli_20220105235251.0.0_amd64.deb $DIR/mc.deb
-sudo chroot $DIR /bin/bash -c "apt-get update -y --allow-unauthenticated; apt-get install -y --allow-unauthenticated ipmctl ndctl libtool m4 automake bison byacc flex tree python2 python3 python3-pip xfsprogs fio jq libsnappy-dev libgflags-dev net-tools zstd"
+sudo chroot $DIR /bin/bash -c "apt-get update -y --allow-unauthenticated; apt-get install -y --allow-unauthenticated ipmctl ndctl libtool m4 automake bison byacc flex tree python2 python3 python3-pip xfsprogs fio jq libsnappy-dev libgflags-dev net-tools zstd numactl"
 sudo chroot $DIR /bin/bash -c "pip3 install json5 pandas matplotlib numpy"
 # sudo chroot $DIR /bin/bash -c "dpkg --purge --force-depends ca-certificates-java"
 # sudo chroot $DIR /bin/bash -c "apt-get update -y --allow-unauthenticated; apt-get install -y --allow-unauthenticated ca-certificates-java"

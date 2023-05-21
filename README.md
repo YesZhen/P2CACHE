@@ -152,7 +152,7 @@ If something is wrong, the script will tell you which component is not good. You
 - When the experiment is done, you can see the figure from the graph path, e.g., `output/meta_without_fsync.png`.
 
 ### (E1) Figure 6a. P²CACHE significantly accelerates metadata operations as against other cases except for TMPFS (Without fsync).
-
+Expected running time: 10 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/meta_without_fsync.sh`  |
@@ -163,7 +163,7 @@ If something is wrong, the script will tell you which component is not good. You
 
 
 ### (E2) Figure 6b. P²CACHE significantly accelerates metadata operations as against other cases except for TMPFS (With fsync).
-
+Expected running time: 30 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/meta_with_fsync.sh`  |
@@ -174,7 +174,7 @@ If something is wrong, the script will tell you which component is not good. You
 
 
 ### (E3) Figure 7a. P²CACHE accelerates data operations, especially for small, partial writes, as against other cases (Without fdatasync).
-
+Expected running time: 30 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/data_without_fdatasync.sh`  |
@@ -185,7 +185,7 @@ If something is wrong, the script will tell you which component is not good. You
 
 
 ### (E4) Figure 7b. P²CACHE accelerates data operations, especially for small, partial writes, as against other cases (With fdatasync).
-
+Expected running time: 30 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/data_with_fdatasync.sh`  |
@@ -195,7 +195,7 @@ If something is wrong, the script will tell you which component is not good. You
 | Plot script path  | `share/artifact/plot/data_with_fdatasync.py`  |
 
 ### (E5) Figure 8.  Comparisons of performance for reads.
-
+Expected running time: 30 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/read.sh`  |
@@ -205,7 +205,7 @@ If something is wrong, the script will tell you which component is not good. You
 | Plot script path  | `share/artifact/plot/read.py`  |
 
 ### (E6) Figure 9.  Scalability test with 4 KB append operations.
-
+Expected running time: 20 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/scalability.sh`  |
@@ -215,7 +215,7 @@ If something is wrong, the script will tell you which component is not good. You
 | Plot script path  | `share/artifact/plot/scalability.py`  |
 
 ### (E7) Figure 10a. Performance comparisons of using real-world applications - Filebench
-
+Expected running time: 15 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/filebench.sh`  |
@@ -225,7 +225,7 @@ If something is wrong, the script will tell you which component is not good. You
 | Plot script path  | `share/artifact/plot/filebench.py`  |
 
 ### (E8) Figure 10b. Performance comparisons of using real-world applications - RocksDB
-
+Expected running time: 15 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/rocksdb.sh`  |
@@ -235,7 +235,7 @@ If something is wrong, the script will tell you which component is not good. You
 | Plot script path  | `share/artifact/plot/rocksdb.py`  |
 
 ### (E9) Figure 10c. Performance comparisons of using real-world applications - MinIO
-
+Expected running time: 15 minutes
 |  Figure info   | Contents  |
 |  ----  | ----  |
 | Experiments script path  | `share/artifact/minio.sh`  |

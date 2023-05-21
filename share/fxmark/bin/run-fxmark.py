@@ -734,8 +734,8 @@ if __name__ == "__main__":
     ]
 
 
-    amount = 100000
-    ts = '1G'
+    amount = 1000000
+    ts = '8G'
 
     bench_types = {
         "meta_without_fsync": [
@@ -791,6 +791,10 @@ if __name__ == "__main__":
             "DATA:R:AS_64K:SS_64K:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_64KB" % (ts, ts),
             "DATA:R:AS_1M:SS_1M:TS_%s:PAS_32K:PSS_32K:PTS_%s:NAME_1MB" % (ts, ts),
         ],
+        "read_hole": [
+            "DATA:R:AS_4K:SS_4K:TS_%s:PAS_3k:PSS_4K:PTS_%s:NAME_HOLE_1KB" % (ts, ts),
+            "DATA:R:AS_4K:SS_4K:TS_%s:PAS_2k:PSS_4K:PTS_%s:NAME_HOLE_2KB" % (ts, ts),
+        ],
         "scalability": [
             "DATA:W:AS_4K:SS_4K:TS_%s:PTS_0:SYNC:NAME_4KB" % ts,
         ],
@@ -807,6 +811,7 @@ if __name__ == "__main__":
         "data_without_fdatasync": base_media_and_fs,
         "data_with_fdatasync": base_media_and_fs,
         "read": base_media_and_fs,
+        "read_hole": [(Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("pmem", "p2cache", "*", "1", "bufferedio"))],
         "scalability": [
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("mem", "tmpfs", "*", "*", "bufferedio")),
             (Runner.CORE_FINE_GRAIN, PerfMon.LEVEL_LOW, ("ssd", "ext4", "*", "*", "bufferedio")),
