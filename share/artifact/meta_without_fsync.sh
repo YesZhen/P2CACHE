@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -n 1048576
+
 rm -f share/tmp/meta_without_fsync.log 
 
 # run experiments

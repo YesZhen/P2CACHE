@@ -533,7 +533,7 @@ class Runner(object):
             os.path.join(self.log_dir,
                          '.'.join([media, fs, type, str(nfg), "pm"])))
 
-        print(self.perfmon_log)
+        # print(self.perfmon_log)
         
         directio = '1' if dio == "directio" else '0'
 
@@ -550,10 +550,10 @@ class Runner(object):
                         "--nbg",  str(nbg),
                         "--duration", str(self.DURATION) if bench_name != "Fileserver" else "10",
                         # "--directio", directio,
-                        "--root", self.test_root,
-                        "--profbegin", "\"%s\"" % self.perfmon_start,
-                        "--profend",   "\"%s\"" % self.perfmon_stop,
-                        "--proflog", self.perfmon_log])
+                        "--root", self.test_root])
+                        # "--profbegin", "\"%s\"" % self.perfmon_start,
+                        # "--profend",   "\"%s\"" % self.perfmon_stop,
+                        # "--proflog", self.perfmon_log])
         
         if type.startswith("DATA"):
             d_as, d_ss, d_ts = 4096, 4096, 8589934592
@@ -630,9 +630,10 @@ class Runner(object):
                 self.log(l.decode("utf-8").strip())
 
     def fxmark_cleanup(self):
-        cmd = ' '.join([self.fxmark_env(),
-                        "%s; rm -f %s/*.pm" % (self.perfmon_stop, self.log_dir)])
-        self.exec_cmd(cmd)
+        return
+        # cmd = ' '.join([self.fxmark_env(),
+        #                 "%s; rm -f %s/*.pm" % (self.perfmon_stop, self.log_dir)])
+        # self.exec_cmd(cmd)
         # self.exec_cmd("sh -c \"echo 0 >/proc/sys/kernel/lock_stat\"", # sudo
         #               self.dev_null)
 

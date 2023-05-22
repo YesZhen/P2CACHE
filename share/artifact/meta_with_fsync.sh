@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -n 1048576
+
 rm -f share/tmp/meta_with_fsync.log 
 
 # run experiments

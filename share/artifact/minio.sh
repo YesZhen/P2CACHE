@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -n 1048576
+
 function prepare_storage() {
     # mountpoint -q /mnt/data
     # if [ $? == 1 ]; then

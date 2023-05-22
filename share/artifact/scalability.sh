@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -n 1048576
+
 rm -f share/tmp/scalability.log 
 
 # run experiments

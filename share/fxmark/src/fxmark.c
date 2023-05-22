@@ -156,9 +156,9 @@ static int parse_option(int argc, char *argv[], struct cmd_opt *opt)
 		{"duration",  required_argument, 0, 'd'}, 
 		{"directio",  required_argument, 0, 'D'}, 
 		{"root",      required_argument, 0, 'r'}, 
-		{"profbegin", required_argument, 0, 'b'},
-		{"profend",   required_argument, 0, 'e'},
-		{"proflog",   required_argument, 0, 'l'},
+		// {"profbegin", required_argument, 0, 'b'},
+		// {"profend",   required_argument, 0, 'e'},
+		// {"proflog",   required_argument, 0, 'l'},
 		{"d_as",	required_argument, 0, 'Z'},
 		{"d_ts",	required_argument, 0, 'Y'},
 		{"d_ss", 	required_argument, 0, 'X'},
@@ -265,9 +265,9 @@ static void usage(FILE *out)
 	fprintf(out, "  --directio  = file flag set O_DIRECT : 0-false, 1-true\n"
 		"                                         (only valid for DWxx type)\n");
 	fprintf(out, "  --root      = test root directory\n");
-	fprintf(out, "  --profbegin = profiling start command\n");
-	fprintf(out, "  --profend   = profiling stop command\n");
-	fprintf(out, "  --proflog   = profiling log file\n");
+	// fprintf(out, "  --profbegin = profiling start command\n");
+	// fprintf(out, "  --profend   = profiling stop command\n");
+	// fprintf(out, "  --proflog   = profiling log file\n");
 }
 
 static void init_bench(struct bench *bench, struct cmd_opt *opt)

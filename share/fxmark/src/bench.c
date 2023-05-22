@@ -114,8 +114,8 @@ static void worker_main(void *arg)
                 // system("echo 3 > /proc/sys/vm/drop_caches");
 
 		/* start performance profiling */
-		if (bench->profile_start_cmd[0])
-			system(bench->profile_start_cmd);
+		// if (bench->profile_start_cmd[0])
+		// 	system(bench->profile_start_cmd);
 
                 /* ok, before running, set timer */
                 if (signal(SIGALRM, sighandler) == SIG_ERR) {
@@ -144,8 +144,8 @@ static void worker_main(void *arg)
         e_us = usec();
 
 	/* stop performance profiling */
-        if (!worker->id && bench->profile_stop_cmd[0])
-		system(bench->profile_stop_cmd);
+        // if (!worker->id && bench->profile_stop_cmd[0])
+	// 	system(bench->profile_stop_cmd);
 
         /* post-work */ 
         if (bench->ops.post_work)
@@ -214,22 +214,25 @@ void report_bench(struct bench *bench, FILE *out)
         avg_secs = (double)total_usecs/(double)n_fg_cpu/1000000.0;
 
 	/* get profiling result */ 
-	profile_name = profile_data = empty_str;
-	if (bench->profile_stat_file[0]) {
-		FILE *fp = fopen(bench->profile_stat_file, "r");
-		size_t len;
+	// profile_name = profile_data = empty_str;
+	// if (bench->profile_stat_file[0]) {
+	// 	FILE *fp = fopen(bench->profile_stat_file, "r");
+	// 	size_t len;
 		
-		if (fp) {
-			profile_name = profile_data = NULL;
-			getline(&profile_name, &len, fp);
-			getline(&profile_data, &len, fp);
-			fclose(fp);
-		}
-	}
+	// 	if (fp) {
+	// 		profile_name = profile_data = NULL;
+	// 		getline(&profile_name, &len, fp);
+	// 		getline(&profile_data, &len, fp);
+	// 		fclose(fp);
+	// 	}
+	// }
 
-        fprintf(out, "# ncpu secs works works/sec %s\n", profile_name);
-        fprintf(out, "%d %f %f %f %s\n", 
-                n_fg_cpu, avg_secs, total_works, total_works/avg_secs, profile_data);
+        // fprintf(out, "# ncpu secs works works/sec %s\n", profile_name);
+        // fprintf(out, "%d %f %f %f %s\n", 
+        //         n_fg_cpu, avg_secs, total_works, total_works/avg_secs, profile_data);
+        fprintf(out, "# ncpu secs works works/sec\n");
+        fprintf(out, "%d %f %f %f\n", 
+                n_fg_cpu, avg_secs, total_works, total_works/avg_secs);
         fprintf(out, "[ncpu]:[%d],[ops]:[%f],", n_fg_cpu, total_works/avg_secs);
 
 	if (profile_name != empty_str)

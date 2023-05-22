@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -n 1048576
+
 rm -f share/tmp/data_without_fdatasync.log 
 
 # run experiments
